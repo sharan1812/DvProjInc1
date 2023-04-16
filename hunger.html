@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+    <head>
+        <script type = "text/javascript" src = "https://d3js.org/d3.v4.min.js"></script>
+        <link rel="stylesheet" href="bootstrap.min.css">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="index.html">Home</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link" href="electricity.html">Electricity</a>
+                    <a class="nav-item nav-link" href="literacy.html">Literature</a>
+                    <a class="nav-item nav-link active" href="hunger.html">Hunger<span class="sr-only">(<)</span></a>
+                        <a class="nav-item nav-link" href="poverty.html">Poverty Rate</a>
+                        </div>
+                </div>
+                </nav>
+
+            <div class="p-3 mb-2 bg-warning text-dark">
+
+
+                <div id="hunger"></div>
+
+                <script language = "javascript">
+
+
+                    // set the dimensions and margins of the graph
+                    var margin = {top: 30, right: 30, bottom: 40, left: 70},
+                        width =1200-margin.left - margin.right,
+                        height = 400 - margin.top - margin.bottom;
+
+                    // append the svg object to the body of the page
+                    var svg = d3.select("#hunger")
+                    .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform",
+                          "translate(" + margin.left + "," + margin.top + ")");
+                    // Add title
+                    svg.append("text")
+                        .attr("x", (width / 2))
+                        .attr("y", 10)
+                        .attr("text-anchor", "middle")
+                        .style("font-size", "24px")
+                        .style("text-decoration", "underline")
+                        .text("Hunger rate in India");
+
+
+                    //Read the data
+                    d3.csv("https://gist.githubusercontent.com/17761A04F1/6f4d230aa9027a46b1149b875155dcb5/raw/11986786ab4e906e59fbcd6efbb6c943c801bd68/hung.csv", function(data) {
+
+                        // Add X axis
+                        var x = d3.scaleLinear()
+                        .domain([10, 25])
+                        .range([ 0, width ]);
+                        svg.append("g")
+                            .attr("transform", "translate(0," + height + ")")
+                            .call(d3.axisBottom(x));
+
+                        // Add Y axis
+                        var y = d3.scaleLinear()
+                        .domain([400, 2500])
+                        .range([ height, 0]);
+                        svg.append("g")
+                            .call(d3.axisLeft(y));
+
+                        // Color scale: give me a specie name, I return a color
+                        var color = d3.scaleOrdinal()
+                        .domain(["2001", "2002", "2003","2004", "2005", "2006","2007", "2008", "2009","2010", "2011", "2012", "2013", "2014","2015", "2016", "2017","2018", "2019", "2020"
+                                ])
+                        .range([ "red", "blue", "grey", "purple", "orange", "green","#red", "#blue", "#grey", "#purple", "#orange", "#green","#grey", "purple", "orange", "green","red", "blue", "grey","red"])
+
+
+                        // Highlight the specie that is hovered
+                        var highlight = function(d){
+
+                            selected_year = d.date
+
+                            d3.selectAll(".dot")
+                                .transition()
+                                .duration(200)
+                                .style("fill", "black")
+                                .attr("r", 3)
+
+                            d3.selectAll("." + selected_year)
+                                .transition()
+                                .duration(200)
+                                .style("fill", color(selected_year))
+                                .x
+                        }
+                        // Add X axis label
+                        svg.append("text")
+                            .attr("class", "axis-label")
+                            .attr("text-anchor", "middle")
+                            .attr("x", width / 2)
+                            .attr("y", 370)
+                            .text("Percentage of Population");
+
+                        // Add Y axis label
+                        svg.append("text")
+                            .attr("class", "axis-label")
+                            .attr("text-anchor", "middle")
+                            .attr("x", -height / 2)
+                            .attr("y", -50)
+                            .attr("transform", "rotate(-90)")
+                            .text("GDP_per_capita_in_USD");
+
+                        // Highlight the specie that is hovered
+                        var doNotHighlight = function(){
+                            d3.selectAll(".dot")
+                                .transition()
+                                .duration(200)
+                                .style("fill", "grey")
+                                .attr("r", 5 )
+                        }
+
+                        // Define the tooltip
+                        var tooltip = d3.select("body")
+                        .append("div")
+                        .attr("class", "tooltip")
+                        .style("opacity", 0);
+
+                        // Function to show the tooltip
+                        var showTooltip = function(d) {
+                            tooltip
+                                .transition()
+                                .duration(200)
+                                .style("opacity", 1);
+                            tooltip
+                                .html("Year: " + d.date + "<br>" + "Percentage of Population: " + d.Percentage_of_Population + "<br>" + "GDP: " + d.GDP_per_capita_in_USD)
+                                .style("left", (d3.event.pageX + 10) + "px")
+                                .style("top", (d3.event.pageY - 28) + "px")
+                                .append("div")
+                                .style("position", "absolute")
+                                .style("z-index", "10")
+                                .style("visibility", "hidden")
+                                .style("background", "#94ffe7")
+                                .text("a simple tooltip");
+                        };
+
+                        // Function to hide the tooltip
+                        var hideTooltip = function(d) {
+                            tooltip
+                                .transition()
+                                .duration(200)
+                                .style("opacity", 0);
+                        };
+
+                        var tooltip = d3.select("body")
+                        //	.append("div")
+                        .attr("class", "tooltip")
+                        //	.style("opacity", 1);
+                        .append("div")
+                        .style("position", "absolute")
+                        .style("z-index", "10")
+                        .style("visibility", "hidden")
+                        .style("background", "#FFFFFF")
+                        .text("a simple tooltip");
+
+                        // Add dots
+                        svg.append('g')
+                            .selectAll("dot")
+                            .data(data)
+                            .enter()
+                            .append("circle")
+                            .attr("class", function (d) { return "dot " + d.date } )
+                            .attr("cx", function (d) { return x(d.Percentage_of_Population); } )
+                            .attr("cy", function (d) { return y(d.GDP_per_capita_in_USD); } )
+                            .attr("r", 5)
+                            .style("fill", function (d) { return color(d.date) } )
+                            .on("mouseover", function(d) {
+                            showTooltip(d);
+                            tooltip.text(d.date); return tooltip.style("visibility", "visible");
+                            d3.select(this)
+                                .style("fill", color(d.date))
+                                .attr("r", 7);
+                        })
+                            .on("mouseleave", function(d) {
+                            hideTooltip(d);
+                            d3.select(this)
+                                .style("fill", color(d.date))
+                                .attr("r", 5);
+                        });
+
+
+
+                    })
+                </script>
+
+
+            </div>
+            
+                 <div class="container-fluid">
+  <div class="row">
+   
+    <div class="col-xl-8 col-lg-8 col-md-8" style="border:1px solid 
+#ddd">
+      <h2>Hunger Rate in India by year</h2>
+      <p>In the above scatter plot, we have 3 attributes in the dataset, and we are showing the hunger rate over the different years using the hunger dataset. For the X axis we are taking attribute as percentage of population and for the Y axis we are considering GDP per capita in usd attribute. So, we are showing the GDP per capita over the years 2001 to  2020 as the last 20 years data. The highest per capita was recorded in the year 2019 and the lowest was recorded in the year 2001. There has been a huge difference over the last 20 years. And also, the percentage of population also increased gradually over the years. 
+In the year 2019 the GDP per capita was recorded highest over the past 20 years as it was $2047, and it’s displayed in grey color and the percentage of population was 14.6. As, we have made it visually look better using the scatter plot with different colors so that when we look into the graph, we can know how it’s performing on which year. 
+The 2nd highest GDP was recorded in the year 2018 with a population around 13.3. So, when we look closer to compare the population it is increasing every year. Due to the increasing population the hunger rate may come into existence because the demand is increasing for the daily needs with respect to the population. If the hunger rate grows on increasing, it finally leads to poverty and effects the country’s GDP at last. So, with the rise in population there should be development in the per capita of the country.
+ </p>
+    </div>
+       <div class="col-xl-4 col-lg-4 col-md-4" style="border:1px solid 
+#ddd">
+      <img src="hun.jpg" alt="responsive webite" class="img-fluid">
+    </div>
+  </div>
+</div>
+            </body>
+        </html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+
+<head>
+  <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+  <link rel="stylesheet" href="bootstrap.min.css">
+  <style>
+    .tooltip {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      background-color: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="index.html">Home</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="electricity.html">Electricity</a>
+        <a class="nav-item nav-link" href="literacy.html">Literature</a>
+        <a class="nav-item nav-link" href="hunger.html">Hunger</a>
+        <a class="nav-item nav-link active" href="poverty.html">Poverty Rate<span class="sr-only">(<)</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="p-3 mb-2 bg-warning text-dark">
+    <div id="poverty"></div>
+  </div>
+
+  <script language="javascript">
+    // set the dimensions and margins of the graph
+    var margin = {
+        top: 60,
+        right: 30,
+        bottom: 70,
+        left: 70
+      },
+      width = 1200 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#poverty")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+    //Read the data
+    d3.csv("https://gist.githubusercontent.com/17761A04F1/239c61bd8dbdca132c15b2c0f444b76d/raw/4085fc2adfbd94e8af0795c3a7418fca6fc96be7/poverty.csv",
+
+      // When reading the csv, I must format variables:
+      function (d) {
+        return {
+          date: d3.timeParse("%Y")(d.date),
+          value: d.value
+        }
+      },
+
+      // Now I can use this dataset:
+      function (data) {
+
+        // Add X axis --> it is a date format
+        var x = d3.scaleTime()
+          .domain(d3.extent(data, function (d) {
+            return d.date;
+          }))
+          .range([0, width]);
+        xAxis = svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x));
+
+            // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([70, d3.max(data, function (d) {
+            return +d.value;
+          })])
+          .range([height, 0]);
+        yAxis = svg.append("g")
+          .call(d3.axisLeft(y));
+
+        // Add line chart
+        svg.append("path")
+          .datum(data)
+          .attr("fill", "none")
+          .attr("stroke", "steelblue")
+          .attr("stroke-width", 2)
+          .attr("d", d3.line()
+            .x(function (d) {
+              return x(d.date)
+            })
+            .y(function (d) {
+              return y(d.value)
+            })
+          );
+
+        // Add tooltip
+        var tooltip = d3.select("body")
+          .append("div")
+          .attr("class", "tooltip");
+
+        // Add dots on data points
+        svg.selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("r", 5)
+          .attr("cx", function (d) {
+            return x(d.date);
+          })
+          .attr("cy", function (d) {
+            return y(d.value);
+          })
+          .on("mouseover", function (d) {
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+            tooltip.html("Year: " + d.date.getFullYear() + "<br/>" +
+                "Poverty Rate: " + d.value + "%")
+              .style("left", (d3.event.pageX + 10) + "px")
+              .style("top", (d3.event.pageY - 28) + "px");
+          })
+          .on("mouseout", function (d) {
+            tooltip.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+
+        // Add chart title
+        svg.append("text")
+          .attr("x", (width / 2))
+          .attr("y", 0 - (margin.top / 2))
+          .attr("text-anchor", "middle")
+          .style("font-size", "20px")
+          .text("Poverty Rate Over Time");
+
+        // Add x axis label
+        svg.append("text")
+          .attr("transform",
+            "translate(" + (width / 2) + " ," +
+            (height + margin.top) + ")")
+          .style("text-anchor", "middle")
+          .text("Year");
+
+        // Add y axis label
+        svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 0 - margin.left)
+          .attr("x", 0 - (height / 2))
+          .attr("dy", "1em")
+          .style("text-anchor", "middle")
+          .text("Poverty Rate (%)");
+      });
+  </script>
+      
+           <div class="container-fluid">
+  <div class="row">
+   
+    <div class="col-xl-8 col-lg-8 col-md-8" style="border:1px solid 
+#ddd">
+      <h2>Poverty rate in India by year</h2>
+      <p>In the above visualization when we compare all the data in the dataset, poverty in India is highest in the year 1990 it was 97.7 where the percentage of people earning under $5.50 a day. Through we are able to understand that the income average overall was very low in the year 1990 the whole income of a day is less than $6 when they worked for at least 8 hours a day. 
+The 2nd lowest is in the year 1987 where the overall percentage recorded was 96.6 with the average income percentage of the people is less than $5.50 a day. Slowly the poverty rate over the years has decreased gradually as it is a good sign for the economic growth of the country. In the earlier days the income was very low so the overall percentage of the people earning under $5 are more compared to the year 2015. 
+The year with the lowest poverty rate was recorded in the year 2018 with 82.6%. When we look into the country, the average is only 18% of people are earning good wages compared to the rest of the majority of people. Due to this the daily needs are rising, and the demand increases significantly. When the percentage of people earning increases the country’s GDP.
+Next lowest poverty rate is recorded in the year 2019 with 83.8. As the poverty rate decreases the overall percentage of daily income will increases. 
+ </p>
+    </div>
+       <div class="col-xl-4 col-lg-4 col-md-4" style="border:1px solid 
+#ddd">
+      <img src="pov.jpg" alt="responsive webite" class="img-fluid">
+    </div>
+  </div>
+</div>
+</body>
+
+</html>
+

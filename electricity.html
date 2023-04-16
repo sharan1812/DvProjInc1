@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+    <head>
+        <script type = "text/javascript" src = "https://d3js.org/d3.v4.min.js"></script>
+        <link rel="stylesheet" href="bootstrap.min.css">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="index.html">Home</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link active" href="electricity.html">Electricity<span class="sr-only">(<)</span></a>
+                        <a class="nav-item nav-link" href="literacy.html">Literature</a>
+                        <a class="nav-item nav-link" href="hunger.html">Hunger</a>
+                        <a class="nav-item nav-link" href="poverty.html">Poverty Rate</a>
+                        </div>
+                </div>
+                </nav>
+
+            <div class="p-3 mb-2 bg-warning text-dark">
+
+
+                <div id="electricity"></div>
+
+                <script language = "javascript">
+
+
+                    // set the dimensions and margins of the graph
+                    var margin = {top: 30, right: 30, bottom: 70, left: 70},
+                        width = 1200 - margin.left - margin.right,
+                        height = 300 - margin.top - margin.bottom;
+
+                    // append the svg object to the body of the page
+                    var svg = d3.select("#electricity")
+                    .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform",
+                          "translate(" + margin.left + "," + margin.top + ")");
+
+                    // Parse the Data
+                    d3.csv("https://gist.githubusercontent.com/17761A04F1/f9f4c4ecabe53e9a317835fa7184aa23/raw/31c72b0c8ef6e773258c03008b26f024a7e1f904/elec.csv", function(data) {
+
+                        // X axis
+                        var x = d3.scaleBand()
+                        .range([ 0, width ])
+                        .domain(data.map(function(d) { return d.date; }))
+                        .padding(0.2);
+                        svg.append("g")
+                            .attr("transform", "translate(0," + height + ")")
+                            .call(d3.axisBottom(x))
+                            .selectAll("text")
+                            .attr("transform", "translate(-10,0)rotate(-45)")
+                            .style("text-anchor", "end");
+
+                        // Add Y axis
+                        var y = d3.scaleLinear()
+                        .domain([45, 100])
+                        .range([ height, 0]);
+                        svg.append("g")
+                            .call(d3.axisLeft(y));
+                        // Add X axis label
+                        svg.append("text")
+                            .attr("class", "axis-label")
+                            .attr("text-anchor", "middle")
+                            .attr("x", width / 2)
+                            .attr("y", 370)
+                            .text("Year");
+                        // Add title
+                        svg.append("text")
+                            .attr("x", (width / 2))
+                            .attr("y", 10)
+                            .attr("text-anchor", "middle")
+                            .style("font-size", "24px")
+                            .style("text-decoration", "underline")
+                            .text("Electricity access in India");
+
+                        // Add Y axis label
+                        svg.append("text")
+                            .attr("class", "axis-label")
+                            .attr("text-anchor", "middle")
+                            .attr("x", -height / 2)
+                            .attr("y", -50)
+                            .attr("transform", "rotate(-90)")
+                            .text("Population Percentage");
+
+                        // Define the div for the tooltip
+                        var tooltip = d3.select("body")
+                        //	.append("div")
+                        .attr("class", "tooltip")
+                        //	.style("opacity", 1);
+                        .append("div")
+                        .style("position", "absolute")
+                        .style("z-index", "10")
+                        .style("visibility", "hidden")
+                        .style("background", "#94ffe7")
+                        .text("a simple tooltip");
+
+                        // Bars
+                        svg.selectAll("mybar")
+                            .data(data)
+                            .enter()
+                            .append("rect")
+                            .attr("x", function(d) { return x(d.date); })
+                            .attr("y", function(d) { return y(d.Population_Percentage); })
+                            .attr("width", x.bandwidth())
+                            .attr("height", function(d) {return height - y(d.Population_Percentage); })
+                            .attr("fill", "#69b3a2")
+
+                            .on("mouseover", function(d){tooltip.text(d.Population_Percentage); return tooltip.style("visibility", "visible");
+                                                         //        .style("top", (d3.event.pageY - 28) + "px")
+                                                         d3.select(this)
+                                                             .attr("fill", "#94ffe7")
+                                                             .style("opacity", 0.9);})
+                            .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+                            .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+
+
+                    });
+                </script>
+
+
+            </div>
+            
+                 <div class="container-fluid">
+  <div class="row">
+   
+    <div class="col-xl col-lg col-md" style="border:1px solid 
+#ddd">
+      <h2>Electricity access in India</h2>
+      <p>When we look into the bar chart, we can understand that the year 2020 has the highest population percentage with 99 when compared to all other years. As we look into the data, we can observe that most of the years the population percentage increased except in a few years. So, in the year 2020 most of the people in India has the access to electricity but when compared to the year 1993 it was only 50.9 % so there is a drastic change it is almost double in 2020.
+Next highest population percentage is in the year 2019 it is around 97.3. The majority of states have access to electricity over the years. As development increases it will directly reflect on the country’s GDP. It is showing the trend over the past 28 years of the electricity access in India. From 2012 to 2020 it has been increasing gradually without decreasing. 
+The lowest of all the years is in 1993 with only 50.9 so it is past 28 years at that time the overall access was very low compared to present so by this it started growing gradually. But in the year 1994 it has decreased to 49.9 % then again later it started increasing till 1999 and in the next 2 years 2001 and 2001 it has again decreased due to various factors and again from 2002 it started increasing till 2010 after that in 2011 it has decreased suddenly to 67% and from that point it only increased till now. 
+</p>
+    </div>
+<!--
+       <div class="col-xl-4 col-lg-4 col-md-4" style="border:1px solid 
+#ddd">
+      <img src="lit.jpg" alt="responsive webite" class="img-fluid">
+-->
+    </div>
+  </div>
+</div>
+            </body>
+        </html>

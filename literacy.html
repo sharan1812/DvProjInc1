@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+    <head>
+        <script type = "text/javascript" src = "https://d3js.org/d3.v4.min.js"></script>
+        <link rel="stylesheet" href="bootstrap.min.css">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="index.html">Home</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link" href="electricity.html">Electricity</a>
+                    <a class="nav-item nav-link active" href="literacy.html">Literacy Rate<span class="sr-only">(<)</span></a>
+                        <a class="nav-item nav-link" href="hunger.html">Hunger</a>
+                        <a class="nav-item nav-link" href="poverty.html">Poverty Rate</a>
+                        </div>
+                </div>
+                </nav>
+
+            <div class="p-3 mb-2 bg-warning text-dark">
+
+
+                <div id="literacy"></div>
+                <button type="button" class="btn btn-success" onclick="update('Literacy Rate (Persons) - Total - 2001')">Total Literacy rate 2001</button>
+                <button type="button" class="btn btn-success" onclick="update('Literacy Rate (Persons) - Total - 2011')">Total Literacy rate 2011</button>
+                <script language = "javascript">
+
+
+                    var margin = {top: 30, right: 30, bottom: 70, left: 60},
+                        width =1300-margin.left - margin.right,
+                        height = 400 - margin.top - margin.bottom;
+
+                    // append the svg object to the body of the page
+                    var svg = d3.select("#literacy")
+                    .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform",
+                          "translate(" + margin.left + "," + margin.top + ")");
+
+                    // Initialize the X axis
+                    var x = d3.scaleBand()
+                    .range([ 0, width ])
+                    .padding(0.2);
+                    var xAxis = svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    // Add X axis label
+                    svg.append("text")             
+                        .attr("transform",
+                              "translate(" + (width/2) + " ," + 
+                              (height + margin.top + 30) + ")")
+                        .style("text-anchor", "middle")
+                        .text("Country/State");
+
+                    // Initialize the Y axis
+                    var y = d3.scaleLinear()
+                    .range([ height, 0]);
+                    var yAxis = svg.append("g")
+                    .attr("class", "myYaxis")
+                    // Add Y axis label
+                    svg.append("text")
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", 0 - margin.left)
+                        .attr("x",0 - (height / 2))
+                        .attr("dy", "1em")
+                        .style("text-anchor", "middle")
+                        .text("Literacy Rate");
+                    // Add title
+                    svg.append("text")
+                        .attr("x", width / 2)
+                        .attr("y", -margin.top / 2)
+                        .attr("text-anchor", "middle")
+                        .attr("class", "title")
+                        .text("Literacy Rate by State");
+                    var tooltip = d3.select("body")
+                    .append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0);
+
+                    // A function that create / update the plot for a given variable:
+                    function update(selectedVar) {
+
+                        // Parse the Data
+                        d3.csv("https://gist.githubusercontent.com/17761A04F1/7fa019d9e461bc69fd3239f432c0f6a2/raw/773511a4ea366bc9b2639e896060a47dc3ece2e3/literacy.csv", function(data) {
+
+                            // X axis
+                            x.domain(data.map(function(d) { return d.Name; }))
+                            xAxis.transition().duration(1000).call(d3.axisBottom(x))
+
+                            // Add Y axis
+                            y.domain([0, d3.max(data, function(d) { return +d[selectedVar] }) ]);
+                            yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+                            // variable u: map data to existing bars
+                            var u = svg.selectAll("rect")
+                            .data(data)
+
+                            // update bars
+                            u
+                                .enter()
+                                .append("rect")
+                                .merge(u)
+                                .transition()
+                                .duration(1000)
+                                .attr("x", function(d) { return x(d.Name); })
+                                .attr("y", function(d) { return y(d[selectedVar]); })
+                                .attr("width", x.bandwidth())
+                                .attr("height", function(d) { return height - y(d[selectedVar]); })
+                                .attr("fill", "brown")
+                                .on("mouseover", function(d){tooltip.text(d.Name); return tooltip.style("visibility", "visible");
+                                                             //        .style("top", (d3.event.pageY - 28) + "px")
+                                                             d3.select(this)
+                                                                 .attr("fill", "#94ffe7")
+                                                                 .style("opacity", 0.9);})
+                                .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+                                .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+
+
+                        })
+
+                    }
+
+                    // Initialize plot
+                    update('Literacy Rate (Persons) - Total - 2001')
+                </script>
+
+
+            </div>
+  
+            
+            <div class="container-fluid">
+  <div class="row">
+   
+    <div class="col-xl-8 col-lg-8 col-md-8" style="border:1px solid 
+#ddd">
+      <h2>Literacy Rate by states/India - 2001 vs 2011</h2>
+      <p>In the above bar chart, we are showing the visualization of Literacy rate over the year 2001 in India compared with all the states. The dataset we are using has 8 attributes in which literacy rates are compared over the years 2001 and 2011 and also with the Urban and rural literacy rates over 2001 and the same with the year 2011.
+When we look into the chart, we are taking country/state attribute on the X axis and Literacy Rate on the Y axis respectively. We can clearly understand that Kerala has the highest literacy rate around 90.9% compared to all other states. So, with this visualization we are able to estimate Kerala has a good number of literates as most of them have the basic knowledge and they can understand things easily.
+While coming to the 2nd highest state which has the better literacy rate is Mizoram. It has around 88.8% of literates in the state and less than Kerala. So with the bar charts we are able to know the literacy rate of Mizoram and it is compared with rest of the states in India. 
+When we closely look into the visualization the state with the lowest literacy rate is Bihar and it is around 47%, least of all states. We can conclude that Bihar has very few literates and the majority of them are illiterate. As the above bar chart clearly shows how huge the difference is between the highest and lowest literacy of states compared in India. It is like almost half of Kerala, it plays the crucial role for the development of the state. 
+Next lowest are Jharkhand and Arunachal it is around 53 & 55 % little greater than the Bihar but the lesser than the Jammu which is around 55.5 %. 
+When coming to the country, the average literacy rate is approximately 65% in 2001. So, through this analysis we are able to understand that it is better than most of the states but overall, it was a decent one when compared to other states. The visualizations clearly show how less most of the states literacy rates are due to poverty comes into existence. If literacy rate increases many individuals know lot of things and through that impact it will be useful for country gdp growth simultaneously. </p>
+    </div>
+       <div class="col-xl-4 col-lg-4 col-md-4" style="border:1px solid 
+#ddd">
+      <img src="lit.jpg" alt="responsive webite" class="img-fluid">
+    </div>
+  </div>
+</div>
+
+            </body>
+        </html>
